@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AIA HealthShield Gold Max Presenter</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <header class="app-header">
+        <div>
+          <p class="eyebrow">Product Illustrator</p>
+          <h1>AIA HealthShield Gold Max</h1>
+        </div>
+      </header>
+
+      <section class="setup-grid">
+        <div class="panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Client Profile</p>
+              <h2>Premium Inputs</h2>
+            </div>
+          </div>
+          <div class="form-grid profile-grid">
+            <label>
+              <span>Age next birthday</span>
+              <input id="age" type="number" min="1" max="110" value="">
+            </label>
+            <label>
+              <span>Citizenship / residency</span>
+              <select id="citizenship">
+                <option value="sc">Singapore Citizen</option>
+                <option value="pr">Permanent Resident</option>
+                <option value="foreignerDependent">Foreigner, dependant of SC/PR</option>
+                <option value="foreignerNonDependent">Foreigner, non-dependant</option>
+              </select>
+            </label>
+            <p class="age-band-note">Age band used: <strong id="ageBandUsed">Enter age next birthday</strong></p>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Claim Scenario</p>
+              <h2>Out-of-Pocket Illustrator</h2>
+            </div>
+          </div>
+          <div class="form-grid three">
+            <label>
+              <span>Scenario type</span>
+              <select id="scenarioType">
+                <option value="inpatient">Inpatient</option>
+                <option value="daySurgery">Day surgery</option>
+                <option value="cancerCdl">Outpatient cancer: CDL treatment</option>
+                <option value="cancerNonCdl">Outpatient cancer: non-CDL treatment</option>
+              </select>
+            </label>
+            <label>
+              <span>Hospital / treatment setting</span>
+              <select id="setting">
+                <option value="privatePreferred">Private / AQHP / CPA</option>
+                <option value="privateNonPreferred">Private non-AQHP without CPA</option>
+                <option value="publicA">Public A ward</option>
+                <option value="publicB1">Public B1 ward</option>
+                <option value="publicB2">Public B2/C ward</option>
+              </select>
+            </label>
+            <label>
+              <span>Eligible bill</span>
+              <input id="bill" type="number" min="0" step="100" value="200000">
+            </label>
+            <label class="cancer-field">
+              <span>MediShield Life cancer limit</span>
+              <input id="mshlCancerLimit" type="number" min="0" step="100" value="9600">
+            </label>
+            <label>
+              <span>Preferred / pre-auth cap met</span>
+              <select id="capMode">
+                <option value="auto">Auto by setting</option>
+                <option value="yes">Yes, cap applies</option>
+                <option value="no">No cap</option>
+              </select>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel table-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Comparison</p>
+            <h2>Premiums, Coverage and Claim Outcome</h2>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table id="comparisonTable"></table>
+        </div>
+      </section>
+
+      <section class="panel faq-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">FAQs</p>
+            <h2>Client Questions</h2>
+          </div>
+        </div>
+        <div class="faq-list" id="faqList"></div>
+      </section>
+
+      <footer class="footnote">
+        Premiums are standard rates before individual MediShield Life subsidies, rebates, additional premiums or underwriting loadings. This is a presentation aid only; policy contract wording and AIA claims assessment prevail.
+      </footer>
+    </main>
+
+    <div class="info-tooltip" id="tooltip" hidden>
+      <div class="info-tooltip-title"></div>
+      <div class="info-tooltip-body"></div>
+    </div>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
