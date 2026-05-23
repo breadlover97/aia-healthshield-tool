@@ -463,7 +463,9 @@ thead th small {
 }
 
 .faq-toggle:hover,
-.faq-toggle:focus {
+.faq-toggle:focus,
+.faq-more-toggle:hover,
+.faq-more-toggle:focus {
   border-color: var(--aia-red);
   color: var(--aia-red);
   outline: none;
@@ -528,6 +530,18 @@ thead th small {
   font-size: 12px;
   font-weight: 750;
   line-height: 1.45;
+}
+
+.faq-more-toggle {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+  padding: 9px 12px;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
 }
 
 .source-details {

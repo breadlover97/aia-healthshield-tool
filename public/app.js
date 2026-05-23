@@ -222,8 +222,8 @@ const faqs = [
 ];
 
 function renderFaqs() {
-  const questionMarkup = ([question, answer]) => `
-    <details class="faq-entry">
+  const questionMarkup = ([question, answer], index) => `
+    <details class="faq-entry${index >= 10 ? " faq-extra" : ""}"${index >= 10 ? " hidden" : ""}>
       <summary>${escapeHtml(question)}</summary>
       <p>${escapeHtml(answer)}</p>
     </details>
@@ -235,6 +235,7 @@ function renderFaqs() {
     <div class="source-links faq-links" data-faq-container>
       ${faqs.map(questionMarkup).join("")}
     </div>
+    <button class="faq-more-toggle" type="button" data-action="toggle-more-faqs">Show more FAQs</button>
   `;
 }
 
@@ -292,10 +293,23 @@ window.addEventListener("scroll", hideTooltip, { passive: true });
 document.addEventListener("click", (event) => {
   const toggle = event.target.closest("[data-action='toggle-faqs']");
   if (!toggle) return;
-  const faqItems = [...document.querySelectorAll(".faq-entry")];
+  const faqItems = [...document.querySelectorAll(".faq-entry:not([hidden])")];
   const shouldOpen = faqItems.some((item) => !item.open);
   for (const item of faqItems) item.open = shouldOpen;
   toggle.textContent = shouldOpen ? "Hide all" : "Expand all";
+});
+
+document.addEventListener("click", (event) => {
+  const toggle = event.target.closest("[data-action='toggle-more-faqs']");
+  if (!toggle) return;
+  const extraFaqs = [...document.querySelectorAll(".faq-extra")];
+  const shouldShow = extraFaqs.some((item) => item.hidden);
+  for (const item of extraFaqs) {
+    item.hidden = !shouldShow;
+    if (!shouldShow) item.open = false;
+  }
+  document.querySelector("[data-action='toggle-faqs']").textContent = "Expand all";
+  toggle.textContent = shouldShow ? "Hide extra FAQs" : "Show more FAQs";
 });
 
 render();
