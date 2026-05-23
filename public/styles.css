@@ -204,6 +204,18 @@ thead th {
   white-space: normal;
 }
 
+thead .ward-group {
+  border-right: 1px solid #c7cfd9;
+  border-bottom: 1px solid #c7cfd9;
+  background: #e3e8ef;
+  color: var(--ink);
+  font-size: 13px;
+}
+
+thead tr:nth-child(2) th {
+  background: #f8fafc;
+}
+
 th:first-child,
 td:first-child,
 tbody th {

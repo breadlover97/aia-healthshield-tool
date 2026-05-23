@@ -86,7 +86,24 @@ function renderComparison(rows) {
   const minOut = Math.min(...rows.map((row) => row.claim.policyholderPays));
   const maxCover = Math.max(...rows.map((row) => row.claim.insurerPays));
   const foreigner = isForeigner(state.citizenship);
-  const head = rows.map(({ combo }) => `<th><span>${escapeHtml(combo.label)}</span><small>${escapeHtml(combo.name)}</small></th>`).join("");
+  const groups = [];
+  for (const row of rows) {
+    const last = groups.at(-1);
+    const ward = PLAN_META[row.combo.plan].ward;
+    if (last?.ward === ward) last.rows.push(row);
+    else groups.push({ ward, rows: [row] });
+  }
+  const groupHead = groups.map((group) => `
+    <th class="ward-group" colspan="${group.rows.length}">
+      <span>${escapeHtml(group.ward)}</span>
+    </th>
+  `).join("");
+  const subHead = rows.map(({ combo }) => `
+    <th>
+      <span>${combo.hasRider ? "With rider" : "No rider"}</span>
+      <small>${escapeHtml(combo.name)}</small>
+    </th>
+  `).join("");
 
   const sectionRow = (label, className) => `
     <tr class="section-row ${className}">
@@ -126,8 +143,11 @@ function renderComparison(rows) {
   $("#comparisonTable").innerHTML = `
     <thead>
       <tr>
-        <th>Item</th>
-        ${head}
+        <th rowspan="2">Item</th>
+        ${groupHead}
+      </tr>
+      <tr>
+        ${subHead}
       </tr>
     </thead>
     <tbody>${tableRows}</tbody>
