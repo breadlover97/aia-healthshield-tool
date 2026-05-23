@@ -15,3 +15,19 @@ Then open `http://localhost:4173`.
 ```bash
 npm run validate
 ```
+
+## Premium Updates
+
+Premiums live in editable CSV tables:
+
+- `public/data/resident-premiums.csv`
+- `public/data/foreigner-premiums.csv`
+
+After replacing or editing the CSV files, run:
+
+```bash
+npm run build:premiums
+npm run validate
+```
+
+The build command regenerates `public/data/premium-table.js`, which is what the website imports. The claim and presentation logic stays in `public/model.js`.

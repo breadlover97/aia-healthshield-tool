@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "build:premiums": "node scripts/build-premium-table.mjs",
     "serve": "node scripts/serve.mjs",
-    "validate": "node scripts/validate-claims.mjs"
+    "validate": "npm run build:premiums && node scripts/validate-claims.mjs"
   }
 }
