@@ -168,6 +168,34 @@ select:focus {
   box-shadow: 0 0 0 3px rgba(211, 17, 69, 0.12);
 }
 
+.checkbox-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.checkbox-control input {
+  width: 16px;
+  min-height: 16px;
+  accent-color: var(--aia-red);
+}
+
+.checkbox-control span {
+  display: inline;
+  margin: 0;
+  color: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+.table-toggle {
+  margin-left: auto;
+}
+
 .muted-field {
   opacity: 0.45;
 }

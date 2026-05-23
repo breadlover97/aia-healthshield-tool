@@ -15,6 +15,7 @@ const state = {
   bill: 200000,
   mshlCancerLimit: 9600,
   capMode: "auto",
+  showNoRider: true,
 };
 
 const fields = ["age", "citizenship", "scenarioType", "setting", "bill", "mshlCancerLimit", "capMode"];
@@ -38,6 +39,7 @@ function readInputs() {
     const el = document.getElementById(field);
     state[field] = el.type === "number" ? (el.value === "" ? "" : Number(el.value)) : el.value;
   }
+  state.showNoRider = $("#showNoRider").checked;
 }
 
 function tooltipLabel(label, title, body) {
@@ -115,6 +117,7 @@ function renderAgeBand(rows) {
 }
 
 function renderComparison(rows) {
+  const visibleRows = state.showNoRider ? rows : rows.filter((row) => row.combo.hasRider);
   if (!rows.length) {
     $("#comparisonTable").innerHTML = `
       <tbody>
@@ -127,11 +130,11 @@ function renderComparison(rows) {
     return;
   }
 
-  const minOut = Math.min(...rows.map((row) => row.claim.policyholderPays));
-  const maxCover = Math.max(...rows.map((row) => row.claim.insurerPays));
+  const minOut = Math.min(...visibleRows.map((row) => row.claim.policyholderPays));
+  const maxCover = Math.max(...visibleRows.map((row) => row.claim.insurerPays));
   const foreigner = isForeigner(state.citizenship);
   const groups = [];
-  for (const row of rows) {
+  for (const row of visibleRows) {
     const last = groups.at(-1);
     const ward = PLAN_META[row.combo.plan].ward;
     if (last?.ward === ward) last.rows.push(row);
@@ -143,7 +146,7 @@ function renderComparison(rows) {
     </th>
   `).join("");
   const groupBoundaryClass = (index) => groups.some((group) => group.startIndex === index && index > 0) ? " group-start" : "";
-  const subHead = rows.map(({ combo }, index) => `
+  const visibleSubHead = visibleRows.map(({ combo }, index) => `
     <th class="${groupBoundaryClass(index).trim()}">
       <span>${combo.hasRider ? "With rider" : "No rider"}</span>
       <small>${escapeHtml(combo.name)}</small>
@@ -153,13 +156,13 @@ function renderComparison(rows) {
   const sectionRow = (label, className) => `
     <tr class="section-row ${className}">
       <th>${escapeHtml(label)}</th>
-      ${rows.map((_, index) => `<td class="${groupBoundaryClass(index).trim()}"></td>`).join("")}
+      ${visibleRows.map((_, index) => `<td class="${groupBoundaryClass(index).trim()}"></td>`).join("")}
     </tr>
   `;
   const rowMarkup = (label, getter, className = "") => `
     <tr class="${className}">
       <th>${label}</th>
-      ${rows.map((row, index) => `<td class="${groupBoundaryClass(index).trim()}">${getter(row)}</td>`).join("")}
+      ${visibleRows.map((row, index) => `<td class="${groupBoundaryClass(index).trim()}">${getter(row)}</td>`).join("")}
     </tr>
   `;
 
@@ -191,7 +194,7 @@ function renderComparison(rows) {
         ${groupHead}
       </tr>
       <tr>
-        ${subHead}
+        ${visibleSubHead}
       </tr>
     </thead>
     <tbody>${tableRows}</tbody>
@@ -275,6 +278,8 @@ for (const field of fields) {
   document.getElementById(field).addEventListener("input", render);
   document.getElementById(field).addEventListener("change", render);
 }
+
+$("#showNoRider").addEventListener("change", render);
 
 document.addEventListener("mouseover", (event) => {
   const target = event.target.closest("[data-title][data-body]");
