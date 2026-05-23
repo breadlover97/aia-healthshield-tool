@@ -225,8 +225,7 @@ td.group-start {
   border-left: 3px solid #aeb8c4;
 }
 
-th:first-child,
-td:first-child,
+thead tr:first-child th:first-child,
 tbody th {
   width: 190px;
   background: #fff;
