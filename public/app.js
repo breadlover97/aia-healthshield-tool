@@ -2,7 +2,6 @@ import {
   COMBINATIONS,
   PLAN_META,
   calculateClaim,
-  claimTooltip,
   isForeigner,
   money,
   premiumForCombination,
@@ -49,6 +48,51 @@ function metricValue(value, title, body, className = "") {
   return `<span class="metric-value ${className}" tabindex="0" data-title="${escapeHtml(title)}" data-body="${escapeHtml(body)}">${formatMoney(value)}</span>`;
 }
 
+function claimableTooltip(row) {
+  const { combo, claim } = row;
+  const lines = [
+    `${money(claim.bill)} bill`,
+    `x ${formatRate(claim.proRate)} pro-ration for ${PLAN_META[combo.plan].short}`,
+  ];
+  if (claim.cancerMultiplier) {
+    lines.push(`Limited to ${claim.cancerMultiplier}x MSHL cancer limit`);
+  } else {
+    lines.push(`Limited to annual claim limit`);
+  }
+  lines.push(`= ${money(claim.claimableAmount)} claimable`);
+  return lines.join("\n");
+}
+
+function outOfPocketTooltip(row) {
+  const { combo, claim } = row;
+  const copayLabel = combo.hasRider ? "co-payment" : "co-insurance";
+  const capLabel = combo.hasRider && claim.capApplies ? " capped" : "";
+  return [
+    `${money(claim.uncovered)} not claimable`,
+    `+ ${money(claim.deductible)} deductible`,
+    `+ ${money(claim.riderCopayment)} ${copayLabel}${capLabel}`,
+    `= ${money(claim.policyholderPays)} out-of-pocket`,
+  ].join("\n");
+}
+
+function aiaCoversTooltip(row) {
+  const { claim } = row;
+  return [
+    `${money(claim.bill)} total bill`,
+    `- ${money(claim.policyholderPays)} out-of-pocket`,
+    `= ${money(claim.insurerPays)} AIA covers`,
+  ].join("\n");
+}
+
+function wardTooltip(ward) {
+  const descriptions = {
+    "Private standard room": "Private hospital standard room entitlement. Public hospital treatment and preferred-provider claims can still be illustrated.",
+    "Public A ward": "Restructured hospital Class A ward entitlement. Private hospital claims may be pro-rated before deductible and co-insurance.",
+    "Public B1 ward": "Restructured hospital Class B1 ward entitlement. Public A or private claims may be pro-rated before deductible and co-insurance.",
+  };
+  return descriptions[ward] || "Ward entitlement used to group plan options in this table.";
+}
+
 function formatRate(value) {
   return `${Math.round(value * 100)}%`;
 }
@@ -91,15 +135,16 @@ function renderComparison(rows) {
     const last = groups.at(-1);
     const ward = PLAN_META[row.combo.plan].ward;
     if (last?.ward === ward) last.rows.push(row);
-    else groups.push({ ward, rows: [row] });
+    else groups.push({ ward, rows: [row], startIndex: groups.reduce((sum, group) => sum + group.rows.length, 0) });
   }
   const groupHead = groups.map((group) => `
     <th class="ward-group" colspan="${group.rows.length}">
-      <span>${escapeHtml(group.ward)}</span>
+      <span class="tooltip-label ward-tooltip" tabindex="0" data-title="${escapeHtml(group.ward)}" data-body="${escapeHtml(wardTooltip(group.ward))}">${escapeHtml(group.ward)}</span>
     </th>
   `).join("");
-  const subHead = rows.map(({ combo }) => `
-    <th>
+  const groupBoundaryClass = (index) => groups.some((group) => group.startIndex === index && index > 0) ? " group-start" : "";
+  const subHead = rows.map(({ combo }, index) => `
+    <th class="${groupBoundaryClass(index).trim()}">
       <span>${combo.hasRider ? "With rider" : "No rider"}</span>
       <small>${escapeHtml(combo.name)}</small>
     </th>
@@ -108,20 +153,19 @@ function renderComparison(rows) {
   const sectionRow = (label, className) => `
     <tr class="section-row ${className}">
       <th>${escapeHtml(label)}</th>
-      ${rows.map(() => `<td></td>`).join("")}
+      ${rows.map((_, index) => `<td class="${groupBoundaryClass(index).trim()}"></td>`).join("")}
     </tr>
   `;
   const rowMarkup = (label, getter, className = "") => `
     <tr class="${className}">
       <th>${label}</th>
-      ${rows.map((row) => `<td>${getter(row)}</td>`).join("")}
+      ${rows.map((row, index) => `<td class="${groupBoundaryClass(index).trim()}">${getter(row)}</td>`).join("")}
     </tr>
   `;
 
   const tableRows = [
     sectionRow("Plan", "plan-section"),
     rowMarkup("Plan name", (row) => escapeHtml(row.combo.name)),
-    rowMarkup("Ward entitlement", (row) => escapeHtml(PLAN_META[row.combo.plan].ward)),
     sectionRow("Premiums", "premium-section"),
     rowMarkup(tooltipLabel("MSL (MediSave)", "MediShield Life premium", foreigner ? "Foreigners are not integrated with MediShield Life." : "Before subsidies, rebates or additional premiums."), (row) => formatMoney(row.premium.msl), "premium-row"),
     rowMarkup(tooltipLabel("Base (MediSave)", "Base premium via MediSave", foreigner ? "For foreigner dependants, MediSave use is subject to withdrawal limits. Non-dependants are cash only." : "Additional coverage premium paid through MediSave up to the withdrawal limit."), (row) => formatMoney(row.premium.baseMedisave), "premium-row"),
@@ -131,9 +175,9 @@ function renderComparison(rows) {
     rowMarkup("Total Cash", (row) => formatMoney(row.premium.totalCash), "premium-total"),
     rowMarkup("Total Annual Premium", (row) => formatMoney(row.premium.totalAnnual), "premium-total"),
     sectionRow("Claims", "claim-section"),
-    rowMarkup(tooltipLabel("Claimable Amount", "Claimable amount", "Hover the dollar values for the calculation."), (row) => metricValue(row.claim.claimableAmount, "Claimable amount", claimTooltip(row.combo, row.claim), row.claim.insurerPays === maxCover ? "metric-best" : ""), "claim-row"),
-    rowMarkup(tooltipLabel("Out-of-pocket", "Policyholder pays", "Hover the dollar values for the calculation."), (row) => metricValue(row.claim.policyholderPays, "Out-of-pocket", claimTooltip(row.combo, row.claim), row.claim.policyholderPays === minOut ? "metric-low" : ""), "claim-row"),
-    rowMarkup(tooltipLabel("AIA Covers", "Claim paid by AIA", "Hover the dollar values for the calculation."), (row) => metricValue(row.claim.insurerPays, "AIA covers", claimTooltip(row.combo, row.claim), row.claim.insurerPays === maxCover ? "metric-best" : ""), "claim-row"),
+    rowMarkup(tooltipLabel("Claimable Amount", "Claimable amount", "Bill after pro-ration and applicable benefit limit."), (row) => metricValue(row.claim.claimableAmount, "Claimable amount", claimableTooltip(row), row.claim.insurerPays === maxCover ? "metric-best" : ""), "claim-row"),
+    rowMarkup(tooltipLabel("Out-of-pocket", "Policyholder pays", "Unclaimable amount plus deductible and co-pay/co-insurance."), (row) => metricValue(row.claim.policyholderPays, "Out-of-pocket", outOfPocketTooltip(row), row.claim.policyholderPays === minOut ? "metric-low" : ""), "claim-row"),
+    rowMarkup(tooltipLabel("AIA Covers", "Claim paid by AIA", "Total bill less the policyholder's out-of-pocket amount."), (row) => metricValue(row.claim.insurerPays, "AIA covers", aiaCoversTooltip(row), row.claim.insurerPays === maxCover ? "metric-best" : ""), "claim-row"),
     sectionRow("Claim mechanics", "mechanics-section"),
     rowMarkup("Pro-ration factor", (row) => formatRate(row.claim.proRate), "mechanics-row"),
     rowMarkup("Deductible", (row) => formatMoney(row.claim.deductible), "mechanics-row"),

@@ -212,8 +212,17 @@ thead .ward-group {
   font-size: 13px;
 }
 
+thead .ward-group:not(:first-of-type) {
+  border-left: 3px solid #aeb8c4;
+}
+
 thead tr:nth-child(2) th {
   background: #f8fafc;
+}
+
+th.group-start,
+td.group-start {
+  border-left: 3px solid #aeb8c4;
 }
 
 th:first-child,
@@ -379,6 +388,16 @@ thead th small {
   color: var(--ink);
   border-bottom-color: var(--aia-red);
   outline: none;
+}
+
+.ward-tooltip {
+  color: var(--ink);
+  border-bottom-color: rgba(28, 37, 48, 0.55);
+}
+
+.ward-tooltip:hover,
+.ward-tooltip:focus {
+  color: var(--aia-red);
 }
 
 .info-tooltip {
