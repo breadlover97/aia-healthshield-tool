@@ -442,36 +442,88 @@ thead th small {
 
 .faq-list {
   display: grid;
-  gap: 8px;
+  gap: 10px;
   padding: 18px 20px 20px;
 }
 
-.faq-links,
-.faq-more .source-links {
+.faq-toolbar {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.faq-toggle {
+  min-height: 36px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.faq-toggle:hover,
+.faq-toggle:focus {
+  border-color: var(--aia-red);
+  color: var(--aia-red);
+  outline: none;
+}
+
+.faq-links {
   display: grid;
-  gap: 12px;
+  gap: 8px;
 }
 
 .faq-entry {
-  display: grid;
-  gap: 4px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--line);
+  border: 1px solid var(--line);
+  background: #fff;
 }
 
-.faq-entry:last-child {
-  padding-bottom: 0;
-  border-bottom: 0;
-}
-
-.faq-entry strong {
+.faq-entry summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 42px;
+  padding: 10px 12px;
   color: var(--ink);
   font-size: 12px;
   font-weight: 950;
   line-height: 1.35;
+  cursor: pointer;
+  list-style: none;
 }
 
-.faq-entry span {
+.faq-entry summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq-entry summary::after {
+  content: "+";
+  flex: 0 0 auto;
+  color: var(--aia-red);
+  font-size: 18px;
+  font-weight: 850;
+  line-height: 1;
+}
+
+.faq-entry[open] summary {
+  border-bottom: 1px solid var(--line);
+}
+
+.faq-entry[open] summary::after {
+  content: "-";
+}
+
+.faq-entry summary:hover,
+.faq-entry summary:focus {
+  color: var(--aia-red);
+  outline: none;
+}
+
+.faq-entry p {
+  margin: 0;
+  padding: 10px 12px 12px;
   color: var(--muted);
   font-size: 12px;
   font-weight: 750;

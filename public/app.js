@@ -223,21 +223,18 @@ const faqs = [
 
 function renderFaqs() {
   const questionMarkup = ([question, answer]) => `
-    <div class="faq-entry">
-      <strong>${escapeHtml(question)}</strong>
-      <span>${escapeHtml(answer)}</span>
-    </div>
+    <details class="faq-entry">
+      <summary>${escapeHtml(question)}</summary>
+      <p>${escapeHtml(answer)}</p>
+    </details>
   `;
   $("#faqList").innerHTML = `
-    <div class="source-links faq-links">
-      ${faqs.slice(0, 10).map(questionMarkup).join("")}
+    <div class="faq-toolbar">
+      <button class="faq-toggle" type="button" data-action="toggle-faqs">Expand all</button>
     </div>
-    <details class="source-details faq-more">
-      <summary>View more FAQs (10)</summary>
-      <div class="source-links">
-        ${faqs.slice(10).map(questionMarkup).join("")}
-      </div>
-    </details>
+    <div class="source-links faq-links" data-faq-container>
+      ${faqs.map(questionMarkup).join("")}
+    </div>
   `;
 }
 
@@ -291,5 +288,14 @@ document.addEventListener("focusin", (event) => {
 });
 document.addEventListener("focusout", hideTooltip);
 window.addEventListener("scroll", hideTooltip, { passive: true });
+
+document.addEventListener("click", (event) => {
+  const toggle = event.target.closest("[data-action='toggle-faqs']");
+  if (!toggle) return;
+  const faqItems = [...document.querySelectorAll(".faq-entry")];
+  const shouldOpen = faqItems.some((item) => !item.open);
+  for (const item of faqItems) item.open = shouldOpen;
+  toggle.textContent = shouldOpen ? "Hide all" : "Expand all";
+});
 
 render();
